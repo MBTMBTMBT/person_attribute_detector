@@ -90,7 +90,7 @@ class ImageOfPerson(ImageWithMasksAndAttributes):
             categories_and_attributes=parent_instance.categories_and_attributes,
         )
 
-    def describe(self) -> str:
+    def describe(self) -> dict:
         male = (
             self.attributes["Male"]
             > self.categories_and_attributes.thresholds_pred["Male"],
@@ -232,7 +232,7 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
             categories_and_attributes=parent_instance.categories_and_attributes,
         )
 
-    def describe(self) -> str:
+    def describe(self) -> dict:
         result = {
             # not in a loop for now, likely to add more logic combined with a classifier of more specific cloth classes.
             "attributes": {

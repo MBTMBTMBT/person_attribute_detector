@@ -3,7 +3,7 @@ from os import path
 
 import cv2
 import numpy as np
-import rospkg
+# import rospkg
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -405,13 +405,20 @@ def load_face_classifier_model():
     model = CombinedModel(segment_model, predict_model, cat_layers=cat_layers)
     model.eval()
 
-    r = rospkg.RosPack()
+    # r = rospkg.RosPack()
+    # model, _, _, _ = load_torch_model(
+    #     model,
+    #     None,
+    #     path=path.join(
+    #         r.get_path("lasr_vision_feature_extraction"), "models", "face_model.pth"
+    #     ),
+    #     cpu_only=True,
+    # )
+
     model, _, _, _ = load_torch_model(
         model,
         None,
-        path=path.join(
-            r.get_path("lasr_vision_feature_extraction"), "models", "face_model.pth"
-        ),
+        path="./models/face_model.pth",
         cpu_only=True,
     )
     return model
@@ -424,15 +431,23 @@ def load_cloth_classifier_model():
     )
     model.eval()
 
-    r = rospkg.RosPack()
+    # r = rospkg.RosPack()
+    # model, _, _, _ = load_torch_model(
+    #     model,
+    #     None,
+    #     path=path.join(
+    #         r.get_path("lasr_vision_feature_extraction"), "models", "cloth_model.pth"
+    #     ),
+    #     cpu_only=True,
+    # )
+
     model, _, _, _ = load_torch_model(
         model,
         None,
-        path=path.join(
-            r.get_path("lasr_vision_feature_extraction"), "models", "cloth_model.pth"
-        ),
+        path="./models/cloth_model.pth",
         cpu_only=True,
     )
+
     return model
 
 
@@ -488,26 +503,17 @@ def extract_mask_region(frame, mask, expand_x=0.5, expand_y=0.5):
 
 
 def predict_frame(
-    head_frame,
-    torso_frame,
-    full_frame,
-    head_mask,
-    torso_mask,
+    image,
     head_predictor,
     cloth_predictor,
 ):
-    full_frame = cv2.cvtColor(full_frame, cv2.COLOR_BGR2RGB)
-    head_frame = cv2.cvtColor(head_frame, cv2.COLOR_BGR2RGB)
-    torso_frame = cv2.cvtColor(torso_frame, cv2.COLOR_BGR2RGB)
-
-    head_frame = pad_image_to_even_dims(head_frame)
-    torso_frame = pad_image_to_even_dims(torso_frame)
+    image = pad_image_to_even_dims(image)
 
     rst_person = ImageOfPerson.from_parent_instance(
-        head_predictor.predict(head_frame)
+        head_predictor.predict(image)
     ).describe()
     rst_cloth = ImageOfCloth.from_parent_instance(
-        cloth_predictor.predict(torso_frame)
+        cloth_predictor.predict(image)
     ).describe()
 
     result = {
