@@ -48,15 +48,20 @@ if __name__ == "__main__":
     cloth_model.return_bbox = False  # unify returns
     cloth_predictor = lasr_vision_feature_extraction.Predictor(cloth_model, torch.device('cpu'),
                                                                DeepFashion2GeneralizedCategoriesAndAttributes)
-    request_masks = ["torso_front", "torso_back", "left_face", "right_face"]
+    request_masks_face = ["left_face", "right_face",]
+    request_masks_torso = ["torso_front", "torso_back",]
+    request_masks = [request_masks_face, request_masks_torso]
     request_poses = []
     masks, poses = bodypix.detect(rgb_image, request_masks, request_poses)
     print(masks, poses)
 
+    head_frame = lasr_vision_feature_extraction.extract_mask_region(rgb_image, masks[0]['mask'].astype(np.uint8),
+                                                                    expand_x=0.4, expand_y=0.5)
+    torso_frame = lasr_vision_feature_extraction.extract_mask_region(rgb_image, masks[1]['mask'].astype(np.uint8),
+                                                                     expand_x=0.2, expand_y=0.0)
+
     rst = lasr_vision_feature_extraction.predict_frame(
-            rgb_image,
-            head_predictor=head_predictor,
-            cloth_predictor=cloth_predictor,
-        )
+        head_frame, torso_frame, rgb_image, masks[0]['mask'].astype(np.uint8), masks[1]['mask'].astype(np.uint8), head_predictor=head_predictor, cloth_predictor=cloth_predictor,
+    )
 
     print(rst)

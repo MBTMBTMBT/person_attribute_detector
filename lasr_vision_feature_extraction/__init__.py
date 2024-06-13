@@ -503,14 +503,20 @@ def extract_mask_region(frame, mask, expand_x=0.5, expand_y=0.5):
 
 
 def predict_frame(
-    image,
-    head_predictor,
-    cloth_predictor,
+        head_frame,
+        torso_frame,
+        full_frame,
+        head_mask,
+        torso_mask,
+        head_predictor,
+        cloth_predictor,
 ):
-    image = pad_image_to_even_dims(image)
+    image = pad_image_to_even_dims(full_frame)
+    head_frame = pad_image_to_even_dims(head_frame)
+    torso_frame = pad_image_to_even_dims(torso_frame)
 
     rst_person = ImageOfPerson.from_parent_instance(
-        head_predictor.predict(image)
+        head_predictor.predict(head_frame)
     ).describe()
     rst_cloth = ImageOfCloth.from_parent_instance(
         cloth_predictor.predict(image)

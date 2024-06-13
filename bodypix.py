@@ -18,17 +18,29 @@ def camel_to_snake(name):
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
-def detect(img: np.ndarray, request_masks: list, request_poses: list, confidence: float = 0.7) -> tuple[
+def detect(img: np.ndarray, request_masks: list, request_poses: list, confidence: float = 0.5) -> tuple[
     list[dict[str, Any]], list[dict[str, list[int] | Any]]]:
+    img = img.astype(np.float32)
+
     result = model.predict_single(img)
 
     mask = result.get_mask(threshold=confidence)
 
+    # colored mask (separate colour for each body part)
+    # colored_mask = result.get_colored_part_mask(mask)
+    # from pathlib import Path
+    # output_path = Path('./data/example-output')
+    # output_path.mkdir(parents=True, exist_ok=True)
+    # tf.keras.preprocessing.image.save_img(
+    #     f'{output_path}/output-colored-mask.jpg',
+    #     colored_mask
+    # )
+
     # construct masks response
     output_masks = []
-    for mask_request in request_masks:
+    for masks_request in request_masks:
         part_mask = result.get_part_mask(
-            mask=tf.identity(mask), part_names=mask_request
+            mask=tf.identity(mask), part_names=masks_request
         ).squeeze()
 
         bodypix_mask = {'mask': part_mask, 'shape': part_mask.shape}
