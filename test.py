@@ -45,8 +45,8 @@ if __name__ == "__main__":
     head_predictor = lasr_vision_feature_extraction.Predictor(head_model, torch.device('cpu'),
                                                               CelebAMaskHQCategoriesAndAttributes)
     cloth_model = lasr_vision_feature_extraction.load_cloth_classifier_model()
-    cloth_model.return_bbox = False  # unify returns
-    cloth_predictor = lasr_vision_feature_extraction.Predictor(cloth_model, torch.device('cpu'),
+    cloth_model.return_bbox = True  # unify returns
+    cloth_predictor = lasr_vision_feature_extraction.ClothPredictor(cloth_model, torch.device('cpu'),
                                                                DeepFashion2GeneralizedCategoriesAndAttributes)
     request_masks_face = ["left_face", "right_face",]
     request_masks_torso = ["torso_front", "torso_back",]
