@@ -560,10 +560,6 @@ def predict_frame(
         cloth_predictor.predict(image)
     ).describe()
 
-    print(ImageOfCloth.from_parent_instance(
-        cloth_predictor.predict(image)
-    ).attributes)
-
     result = {
         "attributes": {**rst_person["attributes"], **rst_cloth["attributes"]},
         "description": rst_person["description"] + rst_cloth["description"],
