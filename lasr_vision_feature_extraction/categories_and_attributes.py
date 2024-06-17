@@ -159,7 +159,8 @@ class CelebAMaskHQCategoriesAndAttributes(CategoriesAndAttributes):
     for key in sorted(merged_categories.keys()):
         thresholds_mask[key] = 0.5
     for key in attributes + mask_labels:
-        thresholds_pred[key] = 0.5
+        if key not in avoided_attributes:
+            thresholds_pred[key] = 0.5
 
     # set specific thresholds:
     thresholds_mask["eye_g"] = 0.5
@@ -182,6 +183,7 @@ class DeepFashion2GeneralizedCategoriesAndAttributes(CategoriesAndAttributes):
         'outwear': ['short sleeve outwear', 'long sleeve outwear', ],
         'dress': ['short sleeve dress', 'long sleeve dress', 'vest dress', 'sling dress', ],
     }
+    mask_labels = ['top', 'down', 'outwear', 'dress', ]
     _categories_to_merge = []
     for key in sorted(list(merged_categories.keys())):
         for cat in merged_categories[key]:
@@ -189,7 +191,6 @@ class DeepFashion2GeneralizedCategoriesAndAttributes(CategoriesAndAttributes):
     for key in mask_categories:
         if key not in _categories_to_merge:
             merged_categories[key] = [key]
-        mask_labels = ['top', 'down', 'outwear', 'dress',]
     selective_attributes = {}
     plane_attributes = []
     avoided_attributes = []
@@ -208,3 +209,4 @@ class DeepFashion2GeneralizedCategoriesAndAttributes(CategoriesAndAttributes):
         thresholds_mask[key] = 0.5
     for key in attributes + mask_labels:
         thresholds_pred[key] = 0.5
+    pass
