@@ -1,4 +1,5 @@
 import cv2
+import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -34,9 +35,32 @@ def capture_rgb_image() -> np.ndarray or None:
         cap.release()
 
 
+def read_image(image_path):
+    """
+    Reads a WebP image and displays it using OpenCV.
+    Falls back to using imageio if OpenCV cannot read the image directly.
+
+    :param image_path: Path to the WebP image file.
+    """
+    # Try to read the image using OpenCV
+    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+
+    # Check if the image was successfully loaded
+    if image is None:
+        # Read the image using imageio
+        image = imageio.imread(image_path)
+
+    else:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    image = np.array(image)
+    return image
+
+
 # Usage example:
 if __name__ == "__main__":
-    rgb_image = capture_rgb_image()
+    # rgb_image = capture_rgb_image()
+    rgb_image = read_image('./test_imgs/vest0.jpeg')
     if rgb_image is not None:
         plt.imshow(rgb_image)
         plt.show()

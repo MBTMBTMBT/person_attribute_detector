@@ -193,7 +193,8 @@ class ImageOfPerson(ImageWithMasksAndAttributes):
                 "has_hair": has_hair[0],
                 "hair_colour": hair_colour_str,
                 "hair_shape": hair_shape_str,
-                "male": male[0],
+                # stop returning "male" label for now, might remove from neural network when training next time.
+                # "male": male[0],
                 "facial_hair": facial_hair[0] != "No_Beard",
                 "hat": hat[0],
                 "glasses": glasses[0],
@@ -235,28 +236,8 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
     def describe(self) -> dict:
         top = self.attributes["top"] > self.categories_and_attributes.thresholds_pred["top"]
         down = self.attributes["down"] > self.categories_and_attributes.thresholds_pred["down"]
-        outwear = self.attributes["outwear"] > self.categories_and_attributes.thresholds_pred["outwear"]
         dress = self.attributes["dress"] > self.categories_and_attributes.thresholds_pred["dress"]
-        short_sleeve_top = self.attributes["short sleeve top"] > self.categories_and_attributes.thresholds_pred[
-            "short sleeve top"]
-        long_sleeve_top = self.attributes["long sleeve top"] > self.categories_and_attributes.thresholds_pred[
-            "long sleeve top"]
-        short_sleeve_outwear = self.attributes["short sleeve outwear"] > self.categories_and_attributes.thresholds_pred[
-            "short sleeve outwear"]
-        long_sleeve_outwear = self.attributes["long sleeve outwear"] > self.categories_and_attributes.thresholds_pred[
-            "long sleeve outwear"]
-        vest = self.attributes["vest"] > self.categories_and_attributes.thresholds_pred["vest"]
-        sling = self.attributes["sling"] > self.categories_and_attributes.thresholds_pred["sling"]
         outwear = self.attributes["outwear"] > self.categories_and_attributes.thresholds_pred["outwear"]
-        shorts = self.attributes["shorts"] > self.categories_and_attributes.thresholds_pred["shorts"]
-        trousers = self.attributes["trousers"] > self.categories_and_attributes.thresholds_pred["trousers"]
-        skirt = self.attributes["skirt"] > self.categories_and_attributes.thresholds_pred["skirt"]
-        short_sleeve_dress = self.attributes["short sleeve dress"] > self.categories_and_attributes.thresholds_pred[
-            "short sleeve dress"]
-        long_sleeve_dress = self.attributes["long sleeve dress"] > self.categories_and_attributes.thresholds_pred[
-            "long sleeve dress"]
-        vest_dress = self.attributes["vest dress"] > self.categories_and_attributes.thresholds_pred["vest dress"]
-        sling_dress = self.attributes["sling dress"] > self.categories_and_attributes.thresholds_pred["sling dress"]
 
         result = {
             # not in a loop for now, likely to add more logic combined with a classifier of more specific cloth classes.
@@ -269,7 +250,7 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
         for attribute in ['short sleeve top', 'long sleeve top', 'short sleeve outwear',
             'long sleeve outwear', 'shorts',
             'trousers', 'skirt', 'short sleeve dress',
-            'long sleeve dress', 'vest dress', 'sling dress' 'sleeveless top']:
+            'long sleeve dress', 'vest dress', 'sling dress', 'sleeveless top']:
             result["attributes"][attribute] = False
 
         if top:
@@ -283,14 +264,16 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
                 max_attribute = "sleeveless top"
             result["attributes"][max_attribute] = True
 
-        if down:
-            max_prob = 0.0
-            max_attribute = "shorts"
-            for attribute in ['shorts', 'trousers', 'skirt', ]:
-                if self.attributes[attribute] > max_prob:
-                    max_prob = self.attributes[attribute]
-                    max_attribute = attribute
-            result["attributes"][max_attribute] = True
+        # "down" is not included for now since it might not be necessary to mention
+        # keep the comments here for showing all the cases.
+        # if down:
+        #     max_prob = 0.0
+        #     max_attribute = "shorts"
+        #     for attribute in ['shorts', 'trousers', 'skirt', ]:
+        #         if self.attributes[attribute] > max_prob:
+        #             max_prob = self.attributes[attribute]
+        #             max_attribute = attribute
+        #     result["attributes"][max_attribute] = True
 
         if outwear:
             max_prob = 0.0
