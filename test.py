@@ -44,14 +44,7 @@ def read_image(image_path):
     """
     # Try to read the image using OpenCV
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-
-    # Check if the image was successfully loaded
-    if image is None:
-        # Read the image using imageio
-        image = imageio.imread(image_path)
-
-    else:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     image = np.array(image)
     return image
@@ -60,10 +53,10 @@ def read_image(image_path):
 # Usage example:
 if __name__ == "__main__":
     # rgb_image = capture_rgb_image()
-    rgb_image = read_image('./test_imgs/vest0.jpeg')
-    if rgb_image is not None:
-        plt.imshow(rgb_image)
-        plt.show()
+    rgb_image = read_image('./test_imgs/mbt.jpeg')
+    # if rgb_image is not None:
+    #     plt.imshow(rgb_image)
+    #     plt.show()
 
     head_model = lasr_vision_feature_extraction.load_face_classifier_model()
     head_predictor = lasr_vision_feature_extraction.Predictor(head_model, torch.device('cpu'),
