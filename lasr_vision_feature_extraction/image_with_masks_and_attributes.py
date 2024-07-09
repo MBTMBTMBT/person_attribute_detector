@@ -117,67 +117,46 @@ class ImageOfPerson(ImageWithMasksAndAttributes):
 
         return result
 
-reference_colors = {
-    "red": [255, 0, 0],
-    "green": [0, 255, 0],
-    "blue": [0, 0, 255],
-    "white": [255, 255, 255],
-    "black": [0, 0, 0],
-    "yellow": [255, 255, 0],
-    "cyan": [0, 255, 255],
-    "magenta": [255, 0, 255],
-    "gray": [128, 128, 128],
-    "orange": [255, 165, 0],
-    "purple": [128, 0, 128],
-    "brown": [139, 69, 19],
-    "pink": [255, 182, 193],
-    "beige": [245, 245, 220],
-    "maroon": [128, 0, 0],
-    "olive": [128, 128, 0],
-    "navy": [0, 0, 128],
-    "lime": [50, 205, 50],
-    "golden": [255, 223, 0],
-    "teal": [0, 128, 128],
-    "coral": [255, 127, 80],
-    "salmon": [250, 128, 114],
-    "turquoise": [64, 224, 208],
-    "violet": [238, 130, 238],
-    "platinum": [229, 228, 226],
-    "ochre": [204, 119, 34],
-    "burntsienna": [233, 116, 81],
-    "chocolate": [210, 105, 30],
-    "tan": [210, 180, 140],
-    "ivory": [255, 255, 240],
-    "goldenrod": [218, 165, 32],
-    "orchid": [218, 112, 214],
-    "honey": [238, 220, 130],
-    "lavender": [230, 230, 250],
-    "mint": [189, 252, 201],
-    "peach": [255, 229, 180],
-    "ruby": [224, 17, 95],
-    "indigo": [75, 0, 130],
-    "amber": [255, 191, 0],
-    "emerald": [80, 200, 120],
-    "sapphire": [15, 82, 186],
-    "aquamarine": [127, 255, 212],
-    "periwinkle": [204, 204, 255],
-    "fuchsia": [255, 0, 255],
-    "raspberry": [227, 11, 92],
-    "slate": [112, 128, 144],
-    "charcoal": [54, 69, 79]
+reference_colors = color_map = {
+    "blue_very_light": np.array([240, 248, 255]),  # Alice blue
+    "blue_light": np.array([173, 216, 230]),       # Light blue
+    "blue_sky": np.array([135, 206, 235]),         # Sky blue
+    "blue_powder": np.array([176, 224, 230]),      # Powder blue
+    "blue_celeste": np.array([178, 255, 255]),     # Celeste, very pale blue shade
+    "blue_periwinkle": np.array([204, 204, 255]),  # Periwinkle, a mix of light blue and lavender
+    "blue_cadet": np.array([95, 158, 160]),        # Cadet blue, a muted blue-green
+    "blue": np.array([0, 0, 255]),                 # Standard blue
+    "blue_royal": np.array([65, 105, 225]),        # Royal blue
+    "blue_deep": np.array([0, 0, 139]),            # Deep blue
+    "blue_dark": np.array([0, 0, 128]),            # Dark blue
+    # "blue_navy": np.array([0, 0, 80]),             # Navy blue
+
+    "yellow_very_light": np.array([255, 255, 204]),  # Very light yellow
+    "yellow_light": np.array([255, 255, 224]),       # Light yellow
+    "yellow": np.array([255, 255, 0]),               # Standard yellow
+    "yellow_gold": np.array([255, 215, 0]),          # Gold yellow
+    "yellow_dark": np.array([204, 204, 0]),          # Dark yellow
+    "yellow_mustard": np.array([255, 219, 88]),      # Mustard yellow
+
+    "red_very_light": np.array([255, 204, 204]),  # Very light red
+    "red_light": np.array([255, 102, 102]),       # Light red
+    "red": np.array([255, 0, 0]),                 # Standard red
+    "red_dark": np.array([139, 0, 0]),            # Dark red
+    "red_maroon": np.array([128, 0, 0]),          # Maroon
+
+    "orange_very_light": np.array([255, 229, 180]),  # Very light orange
+    "orange_light": np.array([255, 179, 71]),        # Light orange
+    "orange": np.array([255, 165, 0]),               # Standard orange
+    "orange_dark": np.array([255, 140, 0]),          # Dark orange
+    "orange_burnt": np.array([204, 85, 0]),          # Burnt orange
+
+    "black": np.array([30, 30, 30]),  # Black
+    "white": np.array([255, 255, 255]),  # White
+    "gray": np.array([160, 160, 160])  # Gray
 }
 
+
 # reference_colors = {colour: arr.T for colour, arr in reference_colors.items()}
-
-def rgb_to_lab(color):
-    rgb_color = np.uint8([[color]])
-    lab_color = cv2.cvtColor(rgb_color, cv2.COLOR_RGB2Lab)
-    return lab_color[0][0]
-
-def cie76_distance(color1, color2):
-    lab1 = rgb_to_lab(color1)
-    lab2 = rgb_to_lab(color2)
-    return np.linalg.norm(lab1 - lab2)
 
 def estimate_color(rgb_array):    
     # Calculate distances to each reference color
@@ -206,7 +185,8 @@ def split_and_sample_colors(image, mask, square_size):
             average_color = square.mean(axis=(0, 1))
             
             # Save the average color in the dictionary
-            squares_colors[square_index] = average_color  # estimate_color(average_color)
+            squares_colors[square_index] = estimate_color(average_color)
+            # squares_colors[square_index] = average_color  # estimate_color(average_color)
             
             # Check the mask condition
             if np.sum(mask_square) > 0.5 * square_size * square_size:
@@ -251,16 +231,25 @@ def visualize_grids(image, squares_colors, square_size):
     square_index = 0
     for y in range(0, height, square_size):
         for x in range(0, width, square_size):
-            # color = np.array(reference_colors[squares_colors[square_index]], dtype=np.uint8)
-            color = np.array(squares_colors[square_index])
-            cv2.rectangle(grid_image, (x, y), (x + square_size, y + square_size), color.tolist(), -1)
-            cv2.rectangle(grid_image, (x, y), (x + square_size, y + square_size), (255, 255, 255), 1)
+            # Get the color from the dictionary
+            color = np.array(reference_colors[squares_colors[square_index]])
+            # Fill the square using numpy slicing
+            grid_image[y:y + square_size, x:x + square_size] = color
+
+            # Optionally draw a white border around the square
+            grid_image[y:y+square_size, x:x+1] = [255, 255, 255]  # Left border
+            grid_image[y:y+square_size, x+square_size-1:x+square_size] = [255, 255, 255]  # Right border
+            grid_image[y:y+1, x:x+square_size] = [255, 255, 255]  # Top border
+            grid_image[y+square_size-1:y+square_size, x:x+square_size] = [255, 255, 255]  # Bottom border
+
             square_index += 1
 
     plt.figure(figsize=(10, 10))
-    plt.imshow(cv2.cvtColor(grid_image, cv2.COLOR_BGR2RGB))
+    plt.imshow(grid_image)
     plt.title('Image with Average Color Grids')
     plt.axis('off')
+    plt.figure()
+    plt.imshow(image)
     plt.show()
 
 
@@ -338,7 +327,8 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
         result["dress"] = 0.0
 
         # ========= colour estimation below: =========
-        blurred_image = gaussian_blur(self.image, kernel_size=3, rep=3)
+        # blurred_image = gaussian_blur(self.image, kernel_size=13, rep=3)
+        blurred_image = self.image
         for cloth in ["top", "down", "outwear", "dress"]:
             mask = self.masks[cloth]
             squares_colors, valid_squares = split_and_sample_colors(blurred_image, mask, 20)
