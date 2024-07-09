@@ -117,7 +117,7 @@ class ImageOfPerson(ImageWithMasksAndAttributes):
 
         return result
 
-reference_colors = color_map = {
+reference_colours = colour_map = {
     "blue_very_light": np.array([240, 248, 255]),  # Alice blue
     "blue_light": np.array([173, 216, 230]),       # Light blue
     "blue_sky": np.array([135, 206, 235]),         # Sky blue
@@ -156,22 +156,61 @@ reference_colors = color_map = {
 }
 
 
-# reference_colors = {colour: arr.T for colour, arr in reference_colors.items()}
+colour_group_map = {
+    "blue_very_light": "blue",
+    "blue_light": "blue",
+    "blue_sky": "blue",
+    "blue_powder": "blue",
+    "blue_celeste": "blue",
+    "blue_periwinkle": "blue",
+    "blue_cadet": "blue",
+    "blue": "blue",
+    "blue_royal": "blue",
+    "blue_deep": "blue",
+    "blue_dark": "blue",
 
-def estimate_color(rgb_array):    
-    # Calculate distances to each reference color
-    # distances = {color: cie76_distance(rgb_array, ref_rgb) for color, ref_rgb in reference_colors.items()}
-    distances = {color: np.linalg.norm(rgb_array - ref_rgb) for color, ref_rgb in reference_colors.items()}
+    "yellow_very_light": "yellow",
+    "yellow_light": "yellow",
+    "yellow": "yellow",
+    "yellow_gold": "yellow",
+    "yellow_dark": "yellow",
+    "yellow_mustard": "yellow",
+
+    "red_very_light": "red",
+    "red_light": "red",
+    "red": "red",
+    "red_dark": "red",
+    "red_maroon": "red",
+
+    "orange_very_light": "orange",
+    "orange_light": "orange",
+    "orange": "orange",
+    "orange_dark": "orange",
+    "orange_burnt": "orange",
+
+    "black": "black",
+    "white": "white",
+    "gray": "gray"
+}
+
+
+
+# reference_colours = {colour: arr.T for colour, arr in reference_colours.items()}
+
+def estimate_colour(rgb_array):    
+    # Calculate distances to each reference colour
+    # distances = {colour: cie76_distance(rgb_array, ref_rgb) for colour, ref_rgb in reference_colours.items()}
+    distances = {colour: np.linalg.norm(rgb_array - ref_rgb) for colour, ref_rgb in reference_colours.items()}
     
-    # Find the color with the smallest distance
-    estimated_color = min(distances, key=distances.get)
+    # Find the colour with the smallest distance
+    estimated_colour = min(distances, key=distances.get)
     
-    return estimated_color
+    return estimated_colour
 
 
-def split_and_sample_colors(image, mask, square_size):
+def split_and_sample_colours(image, mask, square_size):
     height, width, _ = image.shape
-    squares_colors = {}
+    squares_colours = {}
     valid_squares = set()
     
     square_index = 0
@@ -181,20 +220,21 @@ def split_and_sample_colors(image, mask, square_size):
             square = image[y:y + square_size, x:x + square_size]
             mask_square = mask[y:y + square_size, x:x + square_size]
             
-            # Calculate the average color
-            average_color = square.mean(axis=(0, 1))
+            # Calculate the average colour
+            average_colour = square.mean(axis=(0, 1))
             
-            # Save the average color in the dictionary
-            squares_colors[square_index] = estimate_color(average_color)
-            # squares_colors[square_index] = average_color  # estimate_color(average_color)
+            # Save the average colour in the dictionary
+            squares_colours[square_index] = estimate_colour(average_colour)
+            # squares_colours[square_index] = average_colour  # estimate_colour(average_colour)
             
             # Check the mask condition
+            a = np.sum(mask_square)
             if np.sum(mask_square) > 0.5 * square_size * square_size:
                 valid_squares.add(square_index)
             
             square_index += 1
     
-    return squares_colors, valid_squares
+    return squares_colours, valid_squares
 
 
 def gaussian_blur(image, kernel_size, rep=3):
@@ -216,13 +256,13 @@ def gaussian_blur(image, kernel_size, rep=3):
     return image
 
 
-def visualize_grids(image, squares_colors, square_size):
+def visualize_grids(image, squares_colours, square_size):
     """
-    Display the image with colored grids based on average colors.
+    Display the image with coloured grids based on average colours.
 
     Parameters:
     image (numpy.ndarray): The original RGB image.
-    squares_colors (dict): Dictionary with the average colors of each square.
+    squares_colours (dict): Dictionary with the average colours of each square.
     square_size (int): The size of each square.
     """
     height, width, _ = image.shape
@@ -231,10 +271,10 @@ def visualize_grids(image, squares_colors, square_size):
     square_index = 0
     for y in range(0, height, square_size):
         for x in range(0, width, square_size):
-            # Get the color from the dictionary
-            color = np.array(reference_colors[squares_colors[square_index]])
+            # Get the colour from the dictionary
+            colour = np.array(reference_colours[squares_colours[square_index]])
             # Fill the square using numpy slicing
-            grid_image[y:y + square_size, x:x + square_size] = color
+            grid_image[y:y + square_size, x:x + square_size] = colour
 
             # Optionally draw a white border around the square
             grid_image[y:y+square_size, x:x+1] = [255, 255, 255]  # Left border
@@ -246,7 +286,7 @@ def visualize_grids(image, squares_colors, square_size):
 
     plt.figure(figsize=(10, 10))
     plt.imshow(grid_image)
-    plt.title('Image with Average Color Grids')
+    plt.title('Image with Average colour Grids')
     plt.axis('off')
     plt.figure()
     plt.imshow(image)
@@ -331,8 +371,19 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
         blurred_image = self.image
         for cloth in ["top", "down", "outwear", "dress"]:
             mask = self.masks[cloth]
-            squares_colors, valid_squares = split_and_sample_colors(blurred_image, mask, 20)
-            visualize_grids(blurred_image, squares_colors, square_size=20)
-            pass
+            squares_colours, valid_squares = split_and_sample_colours(blurred_image, mask, 20)
+            visualize_grids(blurred_image, squares_colours, square_size=20)
+            _squares_colours = {}
+            for k in squares_colours.keys():
+                if k in valid_squares:
+                    _squares_colours[k] = squares_colours[k]
+            squares_colours = {k: colour_group_map[colour] for k, colour in _squares_colours.items()}
+            squares_colours_count = {}
+            for k, colour in squares_colours.items():
+                if colour not in squares_colours_count.keys():
+                    squares_colours_count[colour] = 1
+                else:
+                    squares_colours_count[colour] += 1
+            print(squares_colours_count)
 
         return result
