@@ -45,6 +45,7 @@ def read_image(image_path):
     # Try to read the image using OpenCV
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.resize(image, (192, 256))
 
     image = np.array(image)
     return image
@@ -53,7 +54,7 @@ def read_image(image_path):
 # Usage example:
 if __name__ == "__main__":
     # rgb_image = capture_rgb_image()
-    rgb_image = read_image('./test_imgs/matt.jpeg')
+    rgb_image = read_image('./test_imgs/mbt.jpeg')
     # if rgb_image is not None:
     #     plt.imshow(rgb_image)
     #     plt.show()

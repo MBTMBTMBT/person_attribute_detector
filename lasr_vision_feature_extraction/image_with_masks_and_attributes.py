@@ -193,7 +193,7 @@ colour_group_map = {
     "gray": "gray"
 }
 
-
+possible_colours = ["blue", "yellow", "red", "orange", "black", "white", "gray"]
 
 # reference_colours = {colour: arr.T for colour, arr in reference_colours.items()}
 
@@ -371,8 +371,10 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
         blurred_image = self.image
         for cloth in ["top", "down", "outwear", "dress"]:
             mask = self.masks[cloth]
+            plt.imshow(mask)
+            plt.show()
             squares_colours, valid_squares = split_and_sample_colours(blurred_image, mask, 20)
-            visualize_grids(blurred_image, squares_colours, square_size=20)
+            # visualize_grids(blurred_image, squares_colours, square_size=20)
             _squares_colours = {}
             for k in squares_colours.keys():
                 if k in valid_squares:
@@ -385,5 +387,11 @@ class ImageOfCloth(ImageWithMasksAndAttributes):
                 else:
                     squares_colours_count[colour] += 1
             print(squares_colours_count)
-
+            tag = cloth + "_colour"
+            result[tag] = {}
+            for k in possible_colours:
+                if k in squares_colours_count.keys():
+                    result[tag][k] = squares_colours_count[k] / len(squares_colours)
+                else:
+                    result[tag][k] = 0.0
         return result

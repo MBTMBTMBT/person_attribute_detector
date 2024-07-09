@@ -1,5 +1,6 @@
 import json
-from os import path
+from os import path#
+import matplotlib.pyplot as plt
 
 import cv2
 import numpy as np
@@ -412,6 +413,14 @@ class ClothPredictor(Predictor):
             erosion_iterations=1,
             dilation_iterations=1,
         )
+        # plt.imshow(pred_masks[0][0].detach().numpy())
+        # plt.show()
+        # plt.imshow(pred_masks[0][1].detach().numpy())
+        # plt.show()
+        # plt.imshow(pred_masks[0][2].detach().numpy())
+        # plt.show()
+        # plt.imshow(pred_masks[0][3].detach().numpy())
+        # plt.show()
         pred_masks = pred_masks.detach().squeeze(0).numpy().astype(np.uint8)
         mask_list = [pred_masks[i, :, :] for i in range(pred_masks.shape[0])]
         pred_classes = pred_classes.detach().squeeze(0).numpy()
